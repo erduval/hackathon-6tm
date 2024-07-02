@@ -1,34 +1,23 @@
-# Utilisation d'une image Symfony avec PHP 8.0
-FROM php:8.2-fpm
+# Utilise une image PHP avec Apache
+FROM php:8.2-apache
 
-# Installation des dépendances Symfony
-RUN apt-get update \
-    && apt-get install -y \
-        git \
-        curl \
-        unzip \
-        libpq-dev \
-        libzip-dev \
-        libicu-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip intl
+# Installation des dépendances
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    && docker-php-ext-install -j$(nproc) intl pdo_mysql
 
-# Composer
+# Configuration Apache
+RUN a2enmod rewrite
+
+# Copie du code source de Symfony dans le conteneur
+COPY . /var/www/html
+
+# Installation des dépendances PHP avec Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN cd /var/www/html && composer install --no-dev --optimize-autoloader
 
-# Définir le répertoire de travail
-WORKDIR /var/www/symfony
+# Définition du port à exposer
+EXPOSE 80
 
-# Copier uniquement les fichiers de configuration de Composer au début
-COPY composer.lock composer.json /var/www/symfony/
-
-# Installer les dépendances PHP (bibliothèques)
-RUN composer install
-
-# Copier le reste du code Symfony dans le conteneur
-COPY ./ .
-
-# Exposer le port utilisé par Symfony
-EXPOSE 8000
-
-# Commande par défaut pour exécuter Symfony
-php -S localhost:8000 -t public
+# Commande par défaut pour lancer Apache
+CMD ["apache2-foreground"]

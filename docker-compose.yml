@@ -3,13 +3,13 @@ version: "3.8"
 services:
   symfony:
     build:
-      context: ./symfony
+      context: .
     ports:
-      - "8000:8000"
+      - "8000:80"
     depends_on:
       - db
     volumes:
-      - ./symfony:/var/www/symfony
+      - ./symfony/var/www/html
 
   vue:
     build:

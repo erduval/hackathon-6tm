@@ -2,7 +2,7 @@
 FROM node:16
 
 # Copie du code Vue.js dans le conteneur
-COPY . /app
+COPY ./ /app
 WORKDIR /app
 
 # Installation des dépendances Vue.js

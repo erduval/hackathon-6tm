@@ -19,7 +19,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 WORKDIR /var/www/symfony
 
 # Copier uniquement les fichiers de configuration de Composer au début
-COPY ./composer.json ./composer.lock ./
+COPY composer.lock composer.json /var/www/symfony/
 
 # Installer les dépendances PHP (bibliothèques)
 RUN composer install
@@ -31,4 +31,4 @@ COPY ./ .
 EXPOSE 8000
 
 # Commande par défaut pour exécuter Symfony
-CMD ["php", "bin/console", "server:run", "0.0.0.0:8000"]
+php -S localhost:8000 -t public

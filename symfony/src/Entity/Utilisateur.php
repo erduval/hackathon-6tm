@@ -57,7 +57,6 @@ class Utilisateur
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -69,7 +68,6 @@ class Utilisateur
     public function setPrenom(string $prenom): static
     {
         $this->prenom = $prenom;
-
         return $this;
     }
 
@@ -81,7 +79,6 @@ class Utilisateur
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -93,7 +90,6 @@ class Utilisateur
     public function setMotDePasse(string $motDePasse): static
     {
         $this->motDePasse = $motDePasse;
-
         return $this;
     }
 
@@ -110,7 +106,6 @@ class Utilisateur
         }
 
         $this->rH = $rH;
-
         return $this;
     }
 
@@ -127,7 +122,6 @@ class Utilisateur
         }
 
         $this->coopteur = $coopteur;
-
         return $this;
     }
 

@@ -39,7 +39,6 @@ class Classement
     public function setPosition(int $position): static
     {
         $this->position = $position;
-
         return $this;
     }
 
@@ -51,7 +50,6 @@ class Classement
     public function setNomEquipe(string $nomEquipe): static
     {
         $this->nomEquipe = $nomEquipe;
-
         return $this;
     }
 
@@ -63,7 +61,6 @@ class Classement
     public function setPoints(int $points): static
     {
         $this->points = $points;
-
         return $this;
     }
 
@@ -75,7 +72,6 @@ class Classement
     public function setEquipe(?Equipe $equipe): static
     {
         $this->equipe = $equipe;
-
         return $this;
     }
 }

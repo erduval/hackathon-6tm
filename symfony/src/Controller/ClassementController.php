@@ -29,6 +29,20 @@ class ClassementController extends AbstractController
     }
 
     /**
+     * @Route("/classement/{id}", name="classement_show", methods={"GET"})
+     */
+    public function show(int $id): JsonResponse
+    {
+        $classement = $this->entityManager->getRepository(Classement::class)->find($id);
+
+        if (!$classement) {
+            return new JsonResponse(['status' => 'Classement not found!'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($classement);
+    }
+
+    /**
      * @Route("/classement", name="classement_create", methods={"POST"})
      */
     public function create(Request $request): JsonResponse
@@ -45,20 +59,6 @@ class ClassementController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Classement created!'], JsonResponse::HTTP_CREATED);
-    }
-
-    /**
-     * @Route("/classement/{id}", name="classement_show", methods={"GET"})
-     */
-    public function show(int $id): JsonResponse
-    {
-        $classement = $this->entityManager->getRepository(Classement::class)->find($id);
-
-        if (!$classement) {
-            return new JsonResponse(['status' => 'Classement not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        return $this->json($classement);
     }
 
     /**
@@ -101,4 +101,3 @@ class ClassementController extends AbstractController
         return new JsonResponse(['status' => 'Classement deleted!'], JsonResponse::HTTP_OK);
     }
 }
-

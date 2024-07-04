@@ -18,6 +18,9 @@ class Equipe
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
+    #[ORM\Column(type: "integer")]
+    private int $totalPoints = 0;
+
     /**
      * @var Collection<int, Classement>
      */
@@ -51,6 +54,27 @@ class Equipe
         $this->nom = $nom;
 
         return $this;
+    }
+
+    public function getTotalPoints(): int
+    {
+        return $this->totalPoints;
+    }
+
+    public function setTotalPoints(int $totalPoints): static
+    {
+        $this->totalPoints = $totalPoints;
+
+        return $this;
+    }
+
+    public function updatePoints(): void
+    {
+        $totalPoints = 0;
+        foreach ($this->equipeUtilisateurs as $equipeUtilisateur) {
+            $totalPoints += $equipeUtilisateur->getUtilisateur()->getCoopteur()->getPoints();
+        }
+        $this->setTotalPoints($totalPoints);
     }
 
     /**

@@ -50,5 +50,17 @@ class CoopteurRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-}
 
+    /**
+     * Find all coopteurs sorted by points in descending order
+     *
+     * @return Coopteur[]
+     */
+    public function findAllOrderByPointsDesc(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.points', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+}

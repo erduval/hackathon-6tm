@@ -50,4 +50,17 @@ class ClassementRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find all classements sorted by points in descending order
+     *
+     * @return Classement[]
+     */
+    public function findAllOrderByPointsDesc(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.points', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

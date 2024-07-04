@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Cooptation;
+use App\Entity\Coopteur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,8 +38,10 @@ class CooptationController extends AbstractController
         $cooptation = new Cooptation();
         $cooptation->setDateCooptation(new \DateTime($data['dateCooptation']));
         $cooptation->setStatut($data['statut']);
+        $cooptation->setCoopteur($this->entityManager->getRepository(Coopteur::class)->find($data['coopteur_id']));
 
         $this->entityManager->persist($cooptation);
+        $this->updatePoints($cooptation);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Cooptation created!'], JsonResponse::HTTP_CREATED);
@@ -73,7 +76,8 @@ class CooptationController extends AbstractController
 
         $cooptation->setDateCooptation(new \DateTime($data['dateCooptation']));
         $cooptation->setStatut($data['statut']);
-
+        $cooptation->setCoopteur($this->entityManager->getRepository(Coopteur::class)->find($data['coopteur_id']));
+        $this->updatePoints($cooptation);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Cooptation updated!'], JsonResponse::HTTP_OK);
@@ -94,5 +98,43 @@ class CooptationController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Cooptation deleted!'], JsonResponse::HTTP_OK);
+    }
+
+    private function updatePoints(Cooptation $cooptation): void
+    {
+        $points = 0;
+        switch ($cooptation->getStatut()) {
+            case 'GO':
+                $points = 1;
+                break;
+            case 'NO GO':
+                $points = 0;
+                break;
+            case 'Bonus Challenge':
+                $points = 3;
+                break;
+            case 'Préqualification téléphonique':
+                $points = 2;
+                break;
+            case 'Entretien RH':
+                $points = 2;
+                break;
+            case 'Entretien Manager':
+                $points = 3;
+                break;
+            case 'Candidat recruté':
+                $points = 5;
+                break;
+        }
+
+        $coopteur = $cooptation->getCoopteur();
+        $coopteur->setPoints($coopteur->getPoints() + $points);
+        $this->entityManager->persist($coopteur);
+
+        foreach ($coopteur->getUtilisateur()->getEquipeUtilisateurs() as $equipeUtilisateur) {
+            $equipe = $equipeUtilisateur->getEquipe();
+            $equipe->updatePoints();
+            $this->entityManager->persist($equipe);
+        }
     }
 }

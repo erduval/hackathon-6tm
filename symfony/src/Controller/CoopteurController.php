@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Coopteur;
 use App\Entity\Utilisateur;
+use App\Entity\Cooptation;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -40,6 +41,8 @@ class CoopteurController extends AbstractController
         $coopteur->setUtilisateur($this->entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']));
 
         $this->entityManager->persist($coopteur);
+        $this->updateEquipePoints($coopteur->getUtilisateur());
+
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Coopteur created!'], JsonResponse::HTTP_CREATED);
@@ -74,6 +77,7 @@ class CoopteurController extends AbstractController
 
         $coopteur->setPoints($data['points']);
         $coopteur->setUtilisateur($this->entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']));
+        $this->updateEquipePoints($coopteur->getUtilisateur());
 
         $this->entityManager->flush();
 
@@ -92,9 +96,19 @@ class CoopteurController extends AbstractController
         }
 
         $this->entityManager->remove($coopteur);
+        $this->updateEquipePoints($coopteur->getUtilisateur());
+
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Coopteur deleted!'], JsonResponse::HTTP_OK);
     }
-}
 
+    private function updateEquipePoints(Utilisateur $utilisateur): void
+    {
+        foreach ($utilisateur->getEquipeUtilisateurs() as $equipeUtilisateur) {
+            $equipe = $equipeUtilisateur->getEquipe();
+            $equipe->updatePoints();
+            $this->entityManager->persist($equipe);
+        }
+    }
+}

@@ -1,5 +1,7 @@
 <?php
 
+<?php
+
 namespace App\Entity;
 
 use App\Repository\CooptationRepository;
@@ -28,6 +30,10 @@ class Cooptation
     #[ORM\OneToMany(targetEntity: CooptationOffreEmploi::class, mappedBy: 'cooptation', orphanRemoval: true)]
     private Collection $cooptationOffreEmplois;
 
+    #[ORM\ManyToOne(targetEntity: Coopteur::class, inversedBy: 'cooptations')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Coopteur $coopteur = null;
+
     public function __construct()
     {
         $this->cooptationOffreEmplois = new ArrayCollection();
@@ -46,7 +52,6 @@ class Cooptation
     public function setDateCooptation(\DateTimeInterface $dateCooptation): static
     {
         $this->dateCooptation = $dateCooptation;
-
         return $this;
     }
 
@@ -58,7 +63,7 @@ class Cooptation
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
+        $this->updateCoopteurPoints();
         return $this;
     }
 
@@ -90,5 +95,47 @@ class Cooptation
         }
 
         return $this;
+    }
+
+    public function getCoopteur(): ?Coopteur
+    {
+        return $this->coopteur;
+    }
+
+    public function setCoopteur(?Coopteur $coopteur): static
+    {
+        $this->coopteur = $coopteur;
+        return $this;
+    }
+
+    private function updateCoopteurPoints(): void
+    {
+        $points = 0;
+
+        switch ($this->statut) {
+            case 'GO':
+                $points = 1;
+                break;
+            case 'NO GO':
+                $points = 0;
+                break;
+            case 'Bonus Challenge':
+                $points = 3;
+                break;
+            case 'Préqualification téléphonique':
+                $points = 2;
+                break;
+            case 'Entretien RH':
+                $points = 2;
+                break;
+            case 'Entretien Manager':
+                $points = 3;
+                break;
+            case 'Candidat recruté':
+                $points = 5;
+                break;
+        }
+
+        $this->coopteur->setPoints($this->coopteur->getPoints() + $points);
     }
 }

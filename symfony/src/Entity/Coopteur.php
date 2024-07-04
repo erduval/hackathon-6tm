@@ -46,7 +46,7 @@ class Coopteur
     public function setPoints(int $points): static
     {
         $this->points = $points;
-
+        $this->updateEquipePoints();
         return $this;
     }
 
@@ -58,7 +58,6 @@ class Coopteur
     public function setUtilisateur(Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
-
         return $this;
     }
 
@@ -90,5 +89,13 @@ class Coopteur
         }
 
         return $this;
+    }
+
+    private function updateEquipePoints(): void
+    {
+        $equipeUtilisateurs = $this->getUtilisateur()->getEquipeUtilisateurs();
+        foreach ($equipeUtilisateurs as $equipeUtilisateur) {
+            $equipeUtilisateur->getEquipe()->updatePoints();
+        }
     }
 }

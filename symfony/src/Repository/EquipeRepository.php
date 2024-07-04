@@ -50,4 +50,17 @@ class EquipeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find all teams sorted by total points in descending order
+     *
+     * @return Equipe[]
+     */
+    public function findAllOrderByTotalPointsDesc(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->orderBy('e.totalPoints', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

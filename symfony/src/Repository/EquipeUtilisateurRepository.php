@@ -8,6 +8,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<EquipeUtilisateur>
+ *
+ * @method EquipeUtilisateur|null find($id, $lockMode = null, $lockVersion = null)
+ * @method EquipeUtilisateur|null findOneBy(array $criteria, array $orderBy = null)
+ * @method EquipeUtilisateur[]    findAll()
+ * @method EquipeUtilisateur[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class EquipeUtilisateurRepository extends ServiceEntityRepository
 {
@@ -16,28 +21,33 @@ class EquipeUtilisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, EquipeUtilisateur::class);
     }
 
-//    /**
-//     * @return EquipeUtilisateur[] Returns an array of EquipeUtilisateur objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find EquipeUtilisateurs by Equipe ID.
+     *
+     * @param int $equipeId
+     * @return EquipeUtilisateur[]
+     */
+    public function findByEquipeId(int $equipeId): array
+    {
+        return $this->createQueryBuilder('eu')
+            ->andWhere('eu.equipe = :equipe')
+            ->setParameter('equipe', $equipeId)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?EquipeUtilisateur
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Find EquipeUtilisateurs by Utilisateur ID.
+     *
+     * @param int $utilisateurId
+     * @return EquipeUtilisateur[]
+     */
+    public function findByUtilisateurId(int $utilisateurId): array
+    {
+        return $this->createQueryBuilder('eu')
+            ->andWhere('eu.utilisateur = :utilisateur')
+            ->setParameter('utilisateur', $utilisateurId)
+            ->getQuery()
+            ->getResult();
+    }
 }

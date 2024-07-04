@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Repository;
 
 use App\Entity\RH;
@@ -8,6 +7,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<RH>
+ *
+ * @method RH|null find($id, $lockMode = null, $lockVersion = null)
+ * @method RH|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RH[]    findAll()
+ * @method RH[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class RHRepository extends ServiceEntityRepository
 {
@@ -16,28 +20,32 @@ class RHRepository extends ServiceEntityRepository
         parent::__construct($registry, RH::class);
     }
 
-//    /**
-//     * @return RH[] Returns an array of RH objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find RH by Utilisateur.
+     *
+     * @param int $utilisateurId
+     * @return RH|null
+     */
+    public function findOneByUtilisateur(int $utilisateurId): ?RH
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.utilisateur = :utilisateurId')
+            ->setParameter('utilisateurId', $utilisateurId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
-//    public function findOneBySomeField($value): ?RH
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Find all RHs ordered by their ID.
+     *
+     * @return RH[]
+     */
+    public function findAllOrderedById(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->orderBy('r.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
+

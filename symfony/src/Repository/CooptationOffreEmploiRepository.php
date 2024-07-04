@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Repository;
 
 use App\Entity\CooptationOffreEmploi;
@@ -8,6 +7,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<CooptationOffreEmploi>
+ *
+ * @method CooptationOffreEmploi|null find($id, $lockMode = null, $lockVersion = null)
+ * @method CooptationOffreEmploi|null findOneBy(array $criteria, array $orderBy = null)
+ * @method CooptationOffreEmploi[]    findAll()
+ * @method CooptationOffreEmploi[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class CooptationOffreEmploiRepository extends ServiceEntityRepository
 {
@@ -16,28 +20,19 @@ class CooptationOffreEmploiRepository extends ServiceEntityRepository
         parent::__construct($registry, CooptationOffreEmploi::class);
     }
 
-//    /**
-//     * @return CooptationOffreEmploi[] Returns an array of CooptationOffreEmploi objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?CooptationOffreEmploi
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Find cooptations by cooptation ID
+     *
+     * @param int $cooptationId
+     * @return CooptationOffreEmploi[]
+     */
+    public function findByCooptationId(int $cooptationId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.cooptation = :cooptationId')
+            ->setParameter('cooptationId', $cooptationId)
+            ->getQuery()
+            ->getResult();
+    }
 }
+

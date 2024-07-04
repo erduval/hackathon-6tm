@@ -8,6 +8,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Equipe>
+ *
+ * @method Equipe|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Equipe|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Equipe[]    findAll()
+ * @method Equipe[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class EquipeRepository extends ServiceEntityRepository
 {
@@ -16,28 +21,33 @@ class EquipeRepository extends ServiceEntityRepository
         parent::__construct($registry, Equipe::class);
     }
 
-//    /**
-//     * @return Equipe[] Returns an array of Equipe objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find teams by name
+     *
+     * @param string $nom
+     * @return Equipe[]
+     */
+    public function findByNom(string $nom): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.nom = :nom')
+            ->setParameter('nom', $nom)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Equipe
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Find all teams with a name containing a specific substring
+     *
+     * @param string $nom
+     * @return Equipe[]
+     */
+    public function findByNomContaining(string $nom): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.nom LIKE :nom')
+            ->setParameter('nom', '%' . $nom . '%')
+            ->getQuery()
+            ->getResult();
+    }
 }

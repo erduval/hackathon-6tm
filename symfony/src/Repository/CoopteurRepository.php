@@ -8,6 +8,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Coopteur>
+ *
+ * @method Coopteur|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Coopteur|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Coopteur[]    findAll()
+ * @method Coopteur[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class CoopteurRepository extends ServiceEntityRepository
 {
@@ -16,28 +21,34 @@ class CoopteurRepository extends ServiceEntityRepository
         parent::__construct($registry, Coopteur::class);
     }
 
-//    /**
-//     * @return Coopteur[] Returns an array of Coopteur objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Find coopteurs by points
+     *
+     * @param int $points
+     * @return Coopteur[]
+     */
+    public function findByPoints(int $points): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.points = :points')
+            ->setParameter('points', $points)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Coopteur
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Find all coopteurs with points greater than a given value
+     *
+     * @param int $points
+     * @return Coopteur[]
+     */
+    public function findWithPointsGreaterThan(int $points): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.points > :points')
+            ->setParameter('points', $points)
+            ->getQuery()
+            ->getResult();
+    }
 }
+

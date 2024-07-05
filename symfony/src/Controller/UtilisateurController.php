@@ -3,101 +3,68 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/api/utilisateur')]
 class UtilisateurController extends AbstractController
 {
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    #[Route('/', name: 'utilisateur_index', methods: ['GET'])]
+    public function index(UtilisateurRepository $utilisateurRepository): Response
     {
-        $this->entityManager = $entityManager;
+        return $this->json($utilisateurRepository->findAll());
     }
 
-    /**
-     * @Route("/utilisateurs", name="utilisateur_index", methods={"GET"})
-     */
-    public function index(): JsonResponse
-    {
-        $utilisateurs = $this->entityManager->getRepository(Utilisateur::class)->findAll();
-        return $this->json($utilisateurs);
-    }
-
-    /**
-     * @Route("/utilisateur", name="utilisateur_create", methods={"POST"})
-     */
-    public function create(Request $request): JsonResponse
+    #[Route('/new', name: 'utilisateur_new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $data = json_decode($request->getContent(), true);
-
         $utilisateur = new Utilisateur();
+        $utilisateur->setLogin($data['login']);
+        $utilisateur->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+        $utilisateur->setRole($data['role']);
         $utilisateur->setNom($data['nom']);
         $utilisateur->setPrenom($data['prenom']);
-        $utilisateur->setEmail($data['email']);
-        $utilisateur->setMotDePasse($data['motDePasse']);
 
-        $this->entityManager->persist($utilisateur);
-        $this->entityManager->flush();
+        $entityManager->persist($utilisateur);
+        $entityManager->flush();
 
-        return new JsonResponse(['status' => 'Utilisateur created!'], JsonResponse::HTTP_CREATED);
+        return $this->json($utilisateur);
     }
 
-   /**
- * @Route("/utilisateur/{id}", name="utilisateur_show", methods={"GET"})
- */
-public function show(int $id): JsonResponse
-{
-    $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
-
-    if (!$utilisateur) {
-        return new JsonResponse(['status' => 'Utilisateur not found!'], JsonResponse::HTTP_NOT_FOUND);
-    }
-
-    return $this->json($utilisateur);
-}
-
-    /**
-     * @Route("/utilisateur/{id}", name="utilisateur_update", methods={"PUT"})
-     */
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/{id}', name: 'utilisateur_show', methods: ['GET'])]
+    public function show(Utilisateur $utilisateur): Response
     {
-        $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
+        return $this->json($utilisateur);
+    }
 
-        if (!$utilisateur) {
-            return new JsonResponse(['status' => 'Utilisateur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
+    #[Route('/{id}/edit', name: 'utilisateur_edit', methods: ['PUT'])]
+    public function edit(Request $request, Utilisateur $utilisateur, EntityManagerInterface $entityManager): Response
+    {
         $data = json_decode($request->getContent(), true);
-
+        $utilisateur->setLogin($data['login']);
+        if (isset($data['password'])) {
+            $utilisateur->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+        }
+        $utilisateur->setRole($data['role']);
         $utilisateur->setNom($data['nom']);
         $utilisateur->setPrenom($data['prenom']);
-        $utilisateur->setEmail($data['email']);
-        $utilisateur->setMotDePasse($data['motDePasse']);
 
-        $this->entityManager->flush();
+        $entityManager->flush();
 
-        return new JsonResponse(['status' => 'Utilisateur updated!'], JsonResponse::HTTP_OK);
+        return $this->json($utilisateur);
     }
 
-    /**
-     * @Route("/utilisateur/{id}", name="utilisateur_delete", methods={"DELETE"})
-     */
-    public function delete(int $id): JsonResponse
+    #[Route('/{id}', name: 'utilisateur_delete', methods: ['DELETE'])]
+    public function delete(Utilisateur $utilisateur, EntityManagerInterface $entityManager): Response
     {
-        $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
+        $entityManager->remove($utilisateur);
+        $entityManager->flush();
 
-        if (!$utilisateur) {
-            return new JsonResponse(['status' => 'Utilisateur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        $this->entityManager->remove($utilisateur);
-        $this->entityManager->flush();
-
-        return new JsonResponse(['status' => 'Utilisateur deleted!'], JsonResponse::HTTP_OK);
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }
-

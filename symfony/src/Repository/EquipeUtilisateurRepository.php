@@ -20,34 +20,4 @@ class EquipeUtilisateurRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, EquipeUtilisateur::class);
     }
-
-    /**
-     * Find EquipeUtilisateurs by Equipe ID.
-     *
-     * @param int $equipeId
-     * @return EquipeUtilisateur[]
-     */
-    public function findByEquipeId(int $equipeId): array
-    {
-        return $this->createQueryBuilder('eu')
-            ->andWhere('eu.equipe = :equipe')
-            ->setParameter('equipe', $equipeId)
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * Find EquipeUtilisateurs by Utilisateur ID.
-     *
-     * @param int $utilisateurId
-     * @return EquipeUtilisateur[]
-     */
-    public function findByUtilisateurId(int $utilisateurId): array
-    {
-        return $this->createQueryBuilder('eu')
-            ->andWhere('eu.utilisateur = :utilisateur')
-            ->setParameter('utilisateur', $utilisateurId)
-            ->getQuery()
-            ->getResult();
-    }
 }

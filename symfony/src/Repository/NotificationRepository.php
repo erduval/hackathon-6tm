@@ -20,20 +20,4 @@ class NotificationRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Notification::class);
     }
-
-    /**
-     * Find notifications by RH ordered by their start date.
-     *
-     * @param int $rhId
-     * @return Notification[]
-     */
-    public function findByRhOrderedByDate(int $rhId): array
-    {
-        return $this->createQueryBuilder('n')
-            ->andWhere('n.rh = :rh')
-            ->setParameter('rh', $rhId)
-            ->orderBy('n.dateDebut', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
 }

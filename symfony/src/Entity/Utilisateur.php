@@ -2,18 +2,26 @@
 
 namespace App\Entity;
 
-use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
+#[ORM\Entity]
 class Utilisateur
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
+    #[ORM\Column(length: 40)]
+    private ?string $login = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $password = null;
+
+    #[ORM\Column(length: 20)]
+    private ?string $role = null;
 
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
@@ -21,22 +29,7 @@ class Utilisateur
     #[ORM\Column(length: 255)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $motDePasse = null;
-
-    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
-    private ?RH $rH = null;
-
-    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
-    private ?Coopteur $coopteur = null;
-
-    /**
-     * @var Collection<int, EquipeUtilisateur>
-     */
-    #[ORM\OneToMany(targetEntity: EquipeUtilisateur::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: EquipeUtilisateur::class, mappedBy: 'utilisateur')]
     private Collection $equipeUtilisateurs;
 
     public function __construct()
@@ -49,12 +42,45 @@ class Utilisateur
         return $this->id;
     }
 
+    public function getLogin(): ?string
+    {
+        return $this->login;
+    }
+
+    public function setLogin(string $login): self
+    {
+        $this->login = $login;
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): self
+    {
+        $this->role = $role;
+        return $this;
+    }
+
     public function getNom(): ?string
     {
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
         return $this;
@@ -65,85 +91,28 @@ class Utilisateur
         return $this->prenom;
     }
 
-    public function setPrenom(string $prenom): static
+    public function setPrenom(string $prenom): self
     {
         $this->prenom = $prenom;
         return $this;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function getMotDePasse(): ?string
-    {
-        return $this->motDePasse;
-    }
-
-    public function setMotDePasse(string $motDePasse): static
-    {
-        $this->motDePasse = $motDePasse;
-        return $this;
-    }
-
-    public function getRH(): ?RH
-    {
-        return $this->rH;
-    }
-
-    public function setRH(RH $rH): static
-    {
-        // set the owning side of the relation if necessary
-        if ($rH->getUtilisateur() !== $this) {
-            $rH->setUtilisateur($this);
-        }
-
-        $this->rH = $rH;
-        return $this;
-    }
-
-    public function getCoopteur(): ?Coopteur
-    {
-        return $this->coopteur;
-    }
-
-    public function setCoopteur(Coopteur $coopteur): static
-    {
-        // set the owning side of the relation if necessary
-        if ($coopteur->getUtilisateur() !== $this) {
-            $coopteur->setUtilisateur($this);
-        }
-
-        $this->coopteur = $coopteur;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, EquipeUtilisateur>
-     */
     public function getEquipeUtilisateurs(): Collection
     {
         return $this->equipeUtilisateurs;
     }
 
-    public function addEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): static
+    public function addEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): self
     {
         if (!$this->equipeUtilisateurs->contains($equipeUtilisateur)) {
-            $this->equipeUtilisateurs->add($equipeUtilisateur);
+            $this->equipeUtilisateurs[] = $equipeUtilisateur;
             $equipeUtilisateur->setUtilisateur($this);
         }
 
         return $this;
     }
 
-    public function removeEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): static
+    public function removeEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): self
     {
         if ($this->equipeUtilisateurs->removeElement($equipeUtilisateur)) {
             // set the owning side to null (unless already changed)

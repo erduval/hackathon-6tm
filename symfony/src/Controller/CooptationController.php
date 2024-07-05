@@ -2,14 +2,17 @@
 
 namespace App\Controller;
 
+
 use App\Entity\Cooptation;
-use App\Entity\Coopteur;
+use App\Repository\CooptationRepository;
+use App\Service\CooptationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/cooptation')]
 class CooptationController extends AbstractController
 {
     private $entityManager;
@@ -19,122 +22,82 @@ class CooptationController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * @Route("/cooptations", name="cooptation_index", methods={"GET"})
-     */
-    public function index(): JsonResponse
+    #[Route('/', name: 'cooptation_index', methods: ['GET'])]
+    public function index(CooptationRepository $cooptationRepository): JsonResponse
     {
-        $cooptations = $this->entityManager->getRepository(Cooptation::class)->findAll();
+        $cooptations = $cooptationRepository->findAll();
         return $this->json($cooptations);
     }
 
-    /**
-     * @Route("/cooptation", name="cooptation_create", methods={"POST"})
-     */
-    public function create(Request $request): JsonResponse
+    #[Route('/new', name: 'cooptation_new', methods: ['POST'])]
+    public function new(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         $cooptation = new Cooptation();
-        $cooptation->setDateCooptation(new \DateTime($data['dateCooptation']));
+        $cooptation->setNom($data['nom']);
+        $cooptation->setPrenom($data['prenom']);
+        $cooptation->setEmail($data['email']);
+        $cooptation->setNumeroTelephone($data['numeroTelephone']);
+        $cooptation->setDomaineRecrutement($data['domaineRecrutement']);
+        $cooptation->setCv($data['cv']);
+        $cooptation->setLienLinkedin($data['lienLinkedin']);
         $cooptation->setStatut($data['statut']);
-        $cooptation->setCoopteur($this->entityManager->getRepository(Coopteur::class)->find($data['coopteur_id']));
+        $cooptation->setCreatedAt(new \DateTime());
 
         $this->entityManager->persist($cooptation);
-        $this->updatePoints($cooptation);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Cooptation created!'], JsonResponse::HTTP_CREATED);
     }
 
-    /**
-     * @Route("/cooptation/{id}", name="cooptation_show", methods={"GET"})
-     */
-    public function show(int $id): JsonResponse
+    #[Route('/{id}', name: 'cooptation_show', methods: ['GET'])]
+    public function show(Cooptation $cooptation): JsonResponse
     {
-        $cooptation = $this->entityManager->getRepository(Cooptation::class)->find($id);
-
-        if (!$cooptation) {
-            return new JsonResponse(['status' => 'Cooptation not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         return $this->json($cooptation);
     }
 
-    /**
-     * @Route("/cooptation/{id}", name="cooptation_update", methods={"PUT"})
-     */
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/{id}/edit', name: 'cooptation_edit', methods: ['PUT'])]
+    public function edit(Request $request, Cooptation $cooptation): JsonResponse
     {
-        $cooptation = $this->entityManager->getRepository(Cooptation::class)->find($id);
-
-        if (!$cooptation) {
-            return new JsonResponse(['status' => 'Cooptation not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         $data = json_decode($request->getContent(), true);
 
-        $cooptation->setDateCooptation(new \DateTime($data['dateCooptation']));
+        $cooptation->setNom($data['nom']);
+        $cooptation->setPrenom($data['prenom']);
+        $cooptation->setEmail($data['email']);
+        $cooptation->setNumeroTelephone($data['numeroTelephone']);
+        $cooptation->setDomaineRecrutement($data['domaineRecrutement']);
+        $cooptation->setCv($data['cv']);
+        $cooptation->setLienLinkedin($data['lienLinkedin']);
         $cooptation->setStatut($data['statut']);
-        $cooptation->setCoopteur($this->entityManager->getRepository(Coopteur::class)->find($data['coopteur_id']));
-        $this->updatePoints($cooptation);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Cooptation updated!'], JsonResponse::HTTP_OK);
     }
 
-    /**
-     * @Route("/cooptation/{id}", name="cooptation_delete", methods={"DELETE"})
-     */
-    public function delete(int $id): JsonResponse
+    #[Route('/{id}', name: 'cooptation_delete', methods: ['DELETE'])]
+    public function delete(Cooptation $cooptation): JsonResponse
     {
-        $cooptation = $this->entityManager->getRepository(Cooptation::class)->find($id);
-
-        if (!$cooptation) {
-            return new JsonResponse(['status' => 'Cooptation not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         $this->entityManager->remove($cooptation);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Cooptation deleted!'], JsonResponse::HTTP_OK);
     }
 
-    private function updatePoints(Cooptation $cooptation): void
+    #[Route('/{id}/statut', name: 'cooptation_update_statut', methods: ['PUT'])]
+    public function updateStatut(int $id, Request $request): JsonResponse
     {
-        $points = 0;
-        switch ($cooptation->getStatut()) {
-            case 'GO':
-                $points = 1;
-                break;
-            case 'NO GO':
-                $points = 0;
-                break;
-            case 'Bonus Challenge':
-                $points = 3;
-                break;
-            case 'Préqualification téléphonique':
-                $points = 2;
-                break;
-            case 'Entretien RH':
-                $points = 2;
-                break;
-            case 'Entretien Manager':
-                $points = 3;
-                break;
-            case 'Candidat recruté':
-                $points = 5;
-                break;
+        $cooptation = $this->entityManager->getRepository(Cooptation::class)->find($id);
+
+        if (!$cooptation) {
+            return new JsonResponse(['status' => 'Cooptation not found!'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $coopteur = $cooptation->getCoopteur();
-        $coopteur->setPoints($coopteur->getPoints() + $points);
-        $this->entityManager->persist($coopteur);
+        $data = json_decode($request->getContent(), true);
+        $newStatut = $data['statut'];
 
-        foreach ($coopteur->getUtilisateur()->getEquipeUtilisateurs() as $equipeUtilisateur) {
-            $equipe = $equipeUtilisateur->getEquipe();
-            $equipe->updatePoints();
-            $this->entityManager->persist($equipe);
-        }
+        $this->cooptationService->updateStatut($cooptation, $newStatut);
+
+        return new JsonResponse(['status' => 'Cooptation statut updated!'], JsonResponse::HTTP_OK);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repository;
 
 use App\Entity\RH;
@@ -19,33 +20,4 @@ class RHRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, RH::class);
     }
-
-    /**
-     * Find RH by Utilisateur.
-     *
-     * @param int $utilisateurId
-     * @return RH|null
-     */
-    public function findOneByUtilisateur(int $utilisateurId): ?RH
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.utilisateur = :utilisateurId')
-            ->setParameter('utilisateurId', $utilisateurId)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
-    /**
-     * Find all RHs ordered by their ID.
-     *
-     * @return RH[]
-     */
-    public function findAllOrderedById(): array
-    {
-        return $this->createQueryBuilder('r')
-            ->orderBy('r.id', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
 }
-

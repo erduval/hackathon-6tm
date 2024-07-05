@@ -2,10 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\CooptationOffreEmploiRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CooptationOffreEmploiRepository::class)]
+#[ORM\Entity]
 class CooptationOffreEmploi
 {
     #[ORM\Id]
@@ -13,9 +12,11 @@ class CooptationOffreEmploi
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'cooptationOffreEmplois')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Cooptation::class)]
     private ?Cooptation $cooptation = null;
+
+    #[ORM\ManyToOne(targetEntity: OffreEmploi::class)]
+    private ?OffreEmploi $offreEmploi = null;
 
     public function getId(): ?int
     {
@@ -27,10 +28,20 @@ class CooptationOffreEmploi
         return $this->cooptation;
     }
 
-    public function setCooptation(?Cooptation $cooptation): static
+    public function setCooptation(?Cooptation $cooptation): self
     {
         $this->cooptation = $cooptation;
+        return $this;
+    }
 
+    public function getOffreEmploi(): ?OffreEmploi
+    {
+        return $this->offreEmploi;
+    }
+
+    public function setOffreEmploi(?OffreEmploi $offreEmploi): self
+    {
+        $this->offreEmploi = $offreEmploi;
         return $this;
     }
 }

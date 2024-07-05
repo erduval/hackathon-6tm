@@ -2,29 +2,24 @@
 
 namespace App\Entity;
 
-use App\Repository\CoopteurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CoopteurRepository::class)]
+#[ORM\Entity]
 class Coopteur
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $points = null;
+    #[ORM\Column(type: 'integer')]
+    private int $points = 0;
 
-    #[ORM\OneToOne(inversedBy: 'coopteur', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(targetEntity: Utilisateur::class, cascade: ['persist', 'remove'])]
     private ?Utilisateur $utilisateur = null;
 
-    /**
-     * @var Collection<int, Candidature>
-     */
     #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'coopteur', orphanRemoval: true)]
     private Collection $candidatures;
 
@@ -38,15 +33,14 @@ class Coopteur
         return $this->id;
     }
 
-    public function getPoints(): ?int
+    public function getPoints(): int
     {
         return $this->points;
     }
 
-    public function setPoints(int $points): static
+    public function setPoints(int $points): self
     {
         $this->points = $points;
-        $this->updateEquipePoints();
         return $this;
     }
 
@@ -55,47 +49,35 @@ class Coopteur
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(Utilisateur $utilisateur): static
+    public function setUtilisateur(Utilisateur $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Candidature>
-     */
     public function getCandidatures(): Collection
     {
         return $this->candidatures;
     }
 
-    public function addCandidature(Candidature $candidature): static
+    public function addCandidature(Candidature $candidature): self
     {
         if (!$this->candidatures->contains($candidature)) {
-            $this->candidatures->add($candidature);
+            $this->candidatures[] = $candidature;
             $candidature->setCoopteur($this);
         }
 
         return $this;
     }
 
-    public function removeCandidature(Candidature $candidature): static
+    public function removeCandidature(Candidature $candidature): self
     {
         if ($this->candidatures->removeElement($candidature)) {
-            // set the owning side to null (unless already changed)
             if ($candidature->getCoopteur() === $this) {
                 $candidature->setCoopteur(null);
             }
         }
 
         return $this;
-    }
-
-    private function updateEquipePoints(): void
-    {
-        $equipeUtilisateurs = $this->getUtilisateur()->getEquipeUtilisateurs();
-        foreach ($equipeUtilisateurs as $equipeUtilisateur) {
-            $equipeUtilisateur->getEquipe()->updatePoints();
-        }
     }
 }

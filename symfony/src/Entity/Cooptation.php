@@ -1,47 +1,43 @@
 <?php
-
-<?php
-
 namespace App\Entity;
 
-use App\Repository\CooptationRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CooptationRepository::class)]
+#[ORM\Entity]
 class Cooptation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateCooptation = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $statut = null;
-
-    /**
-     * @var Collection<int, CooptationOffreEmploi>
-     */
-    #[ORM\OneToMany(targetEntity: CooptationOffreEmploi::class, mappedBy: 'cooptation', orphanRemoval: true)]
-    private Collection $cooptationOffreEmplois;
-
-    #[ORM\ManyToOne(targetEntity: Coopteur::class, inversedBy: 'cooptations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Coopteur::class)]
     private ?Coopteur $coopteur = null;
 
-    public function __construct()
-    {
-        $this->cooptationOffreEmplois = new ArrayCollection();
-    }
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $dateCooptation = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $statut = null;
+
+    #[ORM\OneToOne(targetEntity: Candidature::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: "candidature_id", referencedColumnName: "id")]
+    private ?Candidature $candidature = null;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getCoopteur(): ?Coopteur
+    {
+        return $this->coopteur;
+    }
+
+    public function setCoopteur(?Coopteur $coopteur): self
+    {
+        $this->coopteur = $coopteur;
+        return $this;
     }
 
     public function getDateCooptation(): ?\DateTimeInterface
@@ -49,7 +45,7 @@ class Cooptation
         return $this->dateCooptation;
     }
 
-    public function setDateCooptation(\DateTimeInterface $dateCooptation): static
+    public function setDateCooptation(\DateTimeInterface $dateCooptation): self
     {
         $this->dateCooptation = $dateCooptation;
         return $this;
@@ -60,82 +56,24 @@ class Cooptation
         return $this->statut;
     }
 
-    public function setStatut(string $statut): static
+    public function setStatut(string $statut): self
     {
         $this->statut = $statut;
-        $this->updateCoopteurPoints();
         return $this;
     }
 
-    /**
-     * @return Collection<int, CooptationOffreEmploi>
-     */
-    public function getCooptationOffreEmplois(): Collection
+    public function getCandidature(): ?Candidature
     {
-        return $this->cooptationOffreEmplois;
+        return $this->candidature;
     }
 
-    public function addCooptationOffreEmploi(CooptationOffreEmploi $cooptationOffreEmploi): static
+    public function setCandidature(?Candidature $candidature): self
     {
-        if (!$this->cooptationOffreEmplois->contains($cooptationOffreEmploi)) {
-            $this->cooptationOffreEmplois->add($cooptationOffreEmploi);
-            $cooptationOffreEmploi->setCooptation($this);
-        }
-
+        $this->candidature = $candidature;
         return $this;
-    }
-
-    public function removeCooptationOffreEmploi(CooptationOffreEmploi $cooptationOffreEmploi): static
-    {
-        if ($this->cooptationOffreEmplois->removeElement($cooptationOffreEmploi)) {
-            // set the owning side to null (unless already changed)
-            if ($cooptationOffreEmploi->getCooptation() === $this) {
-                $cooptationOffreEmploi->setCooptation(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getCoopteur(): ?Coopteur
-    {
-        return $this->coopteur;
-    }
-
-    public function setCoopteur(?Coopteur $coopteur): static
-    {
-        $this->coopteur = $coopteur;
-        return $this;
-    }
-
-    private function updateCoopteurPoints(): void
-    {
-        $points = 0;
-
-        switch ($this->statut) {
-            case 'GO':
-                $points = 1;
-                break;
-            case 'NO GO':
-                $points = 0;
-                break;
-            case 'Bonus Challenge':
-                $points = 3;
-                break;
-            case 'Préqualification téléphonique':
-                $points = 2;
-                break;
-            case 'Entretien RH':
-                $points = 2;
-                break;
-            case 'Entretien Manager':
-                $points = 3;
-                break;
-            case 'Candidat recruté':
-                $points = 5;
-                break;
-        }
-
-        $this->coopteur->setPoints($this->coopteur->getPoints() + $points);
     }
 }
+
+
+
+

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Repository;
 
 use App\Entity\Utilisateur;
@@ -21,31 +20,21 @@ class UtilisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, Utilisateur::class);
     }
 
-    /**
-     * Find a user by email.
-     *
-     * @param string $email
-     * @return Utilisateur|null
-     */
-    public function findOneByEmail(string $email): ?Utilisateur
+    public function save(Utilisateur $entity, bool $flush = false): void
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.email = :email')
-            ->setParameter('email', $email)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 
-    /**
-     * Find all users ordered by their last name.
-     *
-     * @return Utilisateur[]
-     */
-    public function findAllOrderedByLastName(): array
+    public function remove(Utilisateur $entity, bool $flush = false): void
     {
-        return $this->createQueryBuilder('u')
-            ->orderBy('u.nom', 'ASC')
-            ->getQuery()
-            ->getResult();
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

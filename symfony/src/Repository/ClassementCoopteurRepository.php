@@ -2,14 +2,14 @@
 
 namespace App\Repository;
 
-use App\Entity\Candidature;
+use App\Entity\ClassementCoopteur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class CandidatureRepository extends ServiceEntityRepository
+class ClassementCoopteurRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Candidature::class);
+        parent::__construct($registry, ClassementCoopteur::class);
     }
 }

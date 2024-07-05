@@ -1,42 +1,34 @@
 <?php
-
 namespace App\Entity;
 
-use App\Repository\EquipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: EquipeRepository::class)]
+#[ORM\Entity]
 class Equipe
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column(type: "integer")]
-    private int $totalPoints = 0;
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $dateCreation = null;
 
-    /**
-     * @var Collection<int, Classement>
-     */
-    #[ORM\OneToMany(targetEntity: Classement::class, mappedBy: 'equipe', orphanRemoval: true)]
-    private Collection $classements;
+    #[ORM\Column(type: 'integer')]
+    private int $taille = 0;
 
-    /**
-     * @var Collection<int, EquipeUtilisateur>
-     */
-    #[ORM\OneToMany(targetEntity: EquipeUtilisateur::class, mappedBy: 'equipe', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: EquipeUtilisateur::class, mappedBy: 'equipe')]
     private Collection $equipeUtilisateurs;
 
     public function __construct()
     {
-        $this->classements = new ArrayCollection();
         $this->equipeUtilisateurs = new ArrayCollection();
+        $this->dateCreation = new \DateTime();
     }
 
     public function getId(): ?int
@@ -49,89 +41,58 @@ class Equipe
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
-
         return $this;
     }
 
-    public function getTotalPoints(): int
+    public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->totalPoints;
+        return $this->dateCreation;
     }
 
-    public function setTotalPoints(int $totalPoints): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): self
     {
-        $this->totalPoints = $totalPoints;
-
+        $this->dateCreation = $dateCreation;
         return $this;
     }
 
-    public function updatePoints(): void
+    public function getTaille(): int
     {
-        $totalPoints = 0;
-        foreach ($this->equipeUtilisateurs as $equipeUtilisateur) {
-            $totalPoints += $equipeUtilisateur->getUtilisateur()->getCoopteur()->getPoints();
-        }
-        $this->setTotalPoints($totalPoints);
+        return $this->taille;
     }
 
-    /**
-     * @return Collection<int, Classement>
-     */
-    public function getClassements(): Collection
+    public function setTaille(int $taille): self
     {
-        return $this->classements;
-    }
-
-    public function addClassement(Classement $classement): static
-    {
-        if (!$this->classements->contains($classement)) {
-            $this->classements->add($classement);
-            $classement->setEquipe($this);
-        }
-
+        $this->taille = $taille;
         return $this;
     }
 
-    public function removeClassement(Classement $classement): static
-    {
-        if ($this->classements->removeElement($classement)) {
-            // set the owning side to null (unless already changed)
-            if ($classement->getEquipe() === $this) {
-                $classement->setEquipe(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, EquipeUtilisateur>
-     */
     public function getEquipeUtilisateurs(): Collection
     {
         return $this->equipeUtilisateurs;
     }
 
-    public function addEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): static
+    public function addEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): self
     {
         if (!$this->equipeUtilisateurs->contains($equipeUtilisateur)) {
-            $this->equipeUtilisateurs->add($equipeUtilisateur);
+            $this->equipeUtilisateurs[] = $equipeUtilisateur;
             $equipeUtilisateur->setEquipe($this);
+            $this->taille = count($this->equipeUtilisateurs);
         }
 
         return $this;
     }
 
-    public function removeEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): static
+    public function removeEquipeUtilisateur(EquipeUtilisateur $equipeUtilisateur): self
     {
         if ($this->equipeUtilisateurs->removeElement($equipeUtilisateur)) {
             // set the owning side to null (unless already changed)
             if ($equipeUtilisateur->getEquipe() === $this) {
                 $equipeUtilisateur->setEquipe(null);
             }
+            $this->taille = count($this->equipeUtilisateurs);
         }
 
         return $this;

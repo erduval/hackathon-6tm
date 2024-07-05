@@ -3,14 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\EquipeUtilisateur;
-use App\Entity\Equipe;
-use App\Entity\Utilisateur;
+use App\Repository\EquipeUtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/equipe-utilisateur')]
 class EquipeUtilisateurController extends AbstractController
 {
     private $entityManager;
@@ -20,25 +20,22 @@ class EquipeUtilisateurController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * @Route("/equipe-utilisateurs", name="equipe_utilisateur_index", methods={"GET"})
-     */
-    public function index(): JsonResponse
+    #[Route('/', name: 'equipe_utilisateur_index', methods: ['GET'])]
+    public function index(EquipeUtilisateurRepository $equipeUtilisateurRepository): JsonResponse
     {
-        $equipeUtilisateurs = $this->entityManager->getRepository(EquipeUtilisateur::class)->findAll();
+        $equipeUtilisateurs = $equipeUtilisateurRepository->findAll();
         return $this->json($equipeUtilisateurs);
     }
 
-    /**
-     * @Route("/equipe-utilisateur", name="equipe_utilisateur_create", methods={"POST"})
-     */
-    public function create(Request $request): JsonResponse
+    #[Route('/new', name: 'equipe_utilisateur_new', methods: ['POST'])]
+    public function new(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         $equipeUtilisateur = new EquipeUtilisateur();
+        $equipeUtilisateur->setUtilisateur($this->getUser());
         $equipeUtilisateur->setEquipe($this->entityManager->getRepository(Equipe::class)->find($data['equipe_id']));
-        $equipeUtilisateur->setUtilisateur($this->entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']));
+        $equipeUtilisateur->setRole($data['role']);
 
         $this->entityManager->persist($equipeUtilisateur);
         $this->entityManager->flush();
@@ -46,56 +43,29 @@ class EquipeUtilisateurController extends AbstractController
         return new JsonResponse(['status' => 'EquipeUtilisateur created!'], JsonResponse::HTTP_CREATED);
     }
 
-    /**
-     * @Route("/equipe-utilisateur/{id}", name="equipe_utilisateur_show", methods={"GET"})
-     */
-    public function show(int $id): JsonResponse
+    #[Route('/{id}', name: 'equipe_utilisateur_show', methods: ['GET'])]
+    public function show(EquipeUtilisateur $equipeUtilisateur): JsonResponse
     {
-        $equipeUtilisateur = $this->entityManager->getRepository(EquipeUtilisateur::class)->find($id);
-
-        if (!$equipeUtilisateur) {
-            return new JsonResponse(['status' => 'EquipeUtilisateur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         return $this->json($equipeUtilisateur);
     }
 
-    /**
-     * @Route("/equipe-utilisateur/{id}", name="equipe_utilisateur_update", methods={"PUT"})
-     */
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/{id}/edit', name: 'equipe_utilisateur_edit', methods: ['PUT'])]
+    public function edit(Request $request, EquipeUtilisateur $equipeUtilisateur): JsonResponse
     {
-        $equipeUtilisateur = $this->entityManager->getRepository(EquipeUtilisateur::class)->find($id);
-
-        if (!$equipeUtilisateur) {
-            return new JsonResponse(['status' => 'EquipeUtilisateur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         $data = json_decode($request->getContent(), true);
 
-        $equipeUtilisateur->setEquipe($this->entityManager->getRepository(Equipe::class)->find($data['equipe_id']));
-        $equipeUtilisateur->setUtilisateur($this->entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']));
-
+        $equipeUtilisateur->setRole($data['role']);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'EquipeUtilisateur updated!'], JsonResponse::HTTP_OK);
     }
 
-    /**
-     * @Route("/equipe-utilisateur/{id}", name="equipe_utilisateur_delete", methods={"DELETE"})
-     */
-    public function delete(int $id): JsonResponse
+    #[Route('/{id}', name: 'equipe_utilisateur_delete', methods: ['DELETE'])]
+    public function delete(EquipeUtilisateur $equipeUtilisateur): JsonResponse
     {
-        $equipeUtilisateur = $this->entityManager->getRepository(EquipeUtilisateur::class)->find($id);
-
-        if (!$equipeUtilisateur) {
-            return new JsonResponse(['status' => 'EquipeUtilisateur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         $this->entityManager->remove($equipeUtilisateur);
         $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'EquipeUtilisateur deleted!'], JsonResponse::HTTP_OK);
     }
 }
-

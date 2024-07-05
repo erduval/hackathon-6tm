@@ -2,11 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\NotificationRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: NotificationRepository::class)]
+#[ORM\Entity]
 class Notification
 {
     #[ORM\Id]
@@ -14,17 +12,16 @@ class Notification
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $message = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateFin = null;
 
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: RH::class)]
     private ?RH $rh = null;
 
     public function getId(): ?int
@@ -37,10 +34,9 @@ class Notification
         return $this->message;
     }
 
-    public function setMessage(string $message): static
+    public function setMessage(string $message): self
     {
         $this->message = $message;
-
         return $this;
     }
 
@@ -49,10 +45,9 @@ class Notification
         return $this->dateDebut;
     }
 
-    public function setDateDebut(\DateTimeInterface $dateDebut): static
+    public function setDateDebut(\DateTimeInterface $dateDebut): self
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
@@ -61,10 +56,9 @@ class Notification
         return $this->dateFin;
     }
 
-    public function setDateFin(\DateTimeInterface $dateFin): static
+    public function setDateFin(\DateTimeInterface $dateFin): self
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 
@@ -73,10 +67,9 @@ class Notification
         return $this->rh;
     }
 
-    public function setRh(?RH $rh): static
+    public function setRh(?RH $rh): self
     {
         $this->rh = $rh;
-
         return $this;
     }
 }

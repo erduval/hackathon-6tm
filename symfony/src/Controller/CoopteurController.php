@@ -3,112 +3,64 @@
 namespace App\Controller;
 
 use App\Entity\Coopteur;
-use App\Entity\Utilisateur;
-use App\Entity\Cooptation;
+use App\Repository\CoopteurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/api/coopteur')]
 class CoopteurController extends AbstractController
 {
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    #[Route('/', name: 'coopteur_index', methods: ['GET'])]
+    public function index(CoopteurRepository $coopteurRepository): Response
     {
-        $this->entityManager = $entityManager;
+        return $this->json($coopteurRepository->findAll());
     }
 
-    /**
-     * @Route("/coopteurs", name="coopteur_index", methods={"GET"})
-     */
-    public function index(): JsonResponse
-    {
-        $coopteurs = $this->entityManager->getRepository(Coopteur::class)->findAll();
-        return $this->json($coopteurs);
-    }
-
-    /**
-     * @Route("/coopteur", name="coopteur_create", methods={"POST"})
-     */
-    public function create(Request $request): JsonResponse
+    #[Route('/new', name: 'coopteur_new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $data = json_decode($request->getContent(), true);
-
         $coopteur = new Coopteur();
         $coopteur->setPoints($data['points']);
-        $coopteur->setUtilisateur($this->entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']));
+        // Assuming you get the utilisateur entity by ID or another means
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']);
+        $coopteur->setUtilisateur($utilisateur);
 
-        $this->entityManager->persist($coopteur);
-        $this->updateEquipePoints($coopteur->getUtilisateur());
-
-        $this->entityManager->flush();
-
-        return new JsonResponse(['status' => 'Coopteur created!'], JsonResponse::HTTP_CREATED);
-    }
-
-    /**
-     * @Route("/coopteur/{id}", name="coopteur_show", methods={"GET"})
-     */
-    public function show(int $id): JsonResponse
-    {
-        $coopteur = $this->entityManager->getRepository(Coopteur::class)->find($id);
-
-        if (!$coopteur) {
-            return new JsonResponse(['status' => 'Coopteur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
+        $entityManager->persist($coopteur);
+        $entityManager->flush();
 
         return $this->json($coopteur);
     }
 
-    /**
-     * @Route("/coopteur/{id}", name="coopteur_update", methods={"PUT"})
-     */
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/{id}', name: 'coopteur_show', methods: ['GET'])]
+    public function show(Coopteur $coopteur): Response
     {
-        $coopteur = $this->entityManager->getRepository(Coopteur::class)->find($id);
+        return $this->json($coopteur);
+    }
 
-        if (!$coopteur) {
-            return new JsonResponse(['status' => 'Coopteur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
+    #[Route('/{id}/edit', name: 'coopteur_edit', methods: ['PUT'])]
+    public function edit(Request $request, Coopteur $coopteur, EntityManagerInterface $entityManager): Response
+    {
         $data = json_decode($request->getContent(), true);
-
         $coopteur->setPoints($data['points']);
-        $coopteur->setUtilisateur($this->entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']));
-        $this->updateEquipePoints($coopteur->getUtilisateur());
+        // Assuming you get the utilisateur entity by ID or another means
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($data['utilisateur_id']);
+        $coopteur->setUtilisateur($utilisateur);
 
-        $this->entityManager->flush();
+        $entityManager->flush();
 
-        return new JsonResponse(['status' => 'Coopteur updated!'], JsonResponse::HTTP_OK);
+        return $this->json($coopteur);
     }
 
-    /**
-     * @Route("/coopteur/{id}", name="coopteur_delete", methods={"DELETE"})
-     */
-    public function delete(int $id): JsonResponse
+    #[Route('/{id}', name: 'coopteur_delete', methods: ['DELETE'])]
+    public function delete(Coopteur $coopteur, EntityManagerInterface $entityManager): Response
     {
-        $coopteur = $this->entityManager->getRepository(Coopteur::class)->find($id);
+        $entityManager->remove($coopteur);
+        $entityManager->flush();
 
-        if (!$coopteur) {
-            return new JsonResponse(['status' => 'Coopteur not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        $this->entityManager->remove($coopteur);
-        $this->updateEquipePoints($coopteur->getUtilisateur());
-
-        $this->entityManager->flush();
-
-        return new JsonResponse(['status' => 'Coopteur deleted!'], JsonResponse::HTTP_OK);
-    }
-
-    private function updateEquipePoints(Utilisateur $utilisateur): void
-    {
-        foreach ($utilisateur->getEquipeUtilisateurs() as $equipeUtilisateur) {
-            $equipe = $equipeUtilisateur->getEquipe();
-            $equipe->updatePoints();
-            $this->entityManager->persist($equipe);
-        }
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }

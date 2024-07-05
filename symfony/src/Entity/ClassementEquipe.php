@@ -1,11 +1,12 @@
 <?php
 
+// src/Entity/ClassementEquipe.php
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-class EquipeUtilisateur
+class ClassementEquipe
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -15,8 +16,8 @@ class EquipeUtilisateur
     #[ORM\ManyToOne(targetEntity: Equipe::class)]
     private ?Equipe $equipe = null;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    private ?Utilisateur $utilisateur = null;
+    #[ORM\Column(type: 'integer')]
+    private ?int $position = null;
 
     public function getId(): ?int
     {
@@ -34,14 +35,14 @@ class EquipeUtilisateur
         return $this;
     }
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getPosition(): ?int
     {
-        return $this->utilisateur;
+        return $this->position;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): self
+    public function setPosition(int $position): self
     {
-        $this->utilisateur = $utilisateur;
+        $this->position = $position;
         return $this;
     }
 }

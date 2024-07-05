@@ -3,13 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\CooptationOffreEmploi;
-use App\Entity\Cooptation;
+use App\Repository\CooptationOffreEmploiRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/cooptation-offre-emploi')]
 class CooptationOffreEmploiController extends AbstractController
 {
     private $entityManager;
@@ -19,80 +20,52 @@ class CooptationOffreEmploiController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * @Route("/cooptation-offres", name="cooptation_offre_emploi_index", methods={"GET"})
-     */
-    public function index(): JsonResponse
+    #[Route('/', name: 'cooptation_offre_emploi_index', methods: ['GET'])]
+    public function index(CooptationOffreEmploiRepository $cooptationOffreEmploiRepository): JsonResponse
     {
-        $cooptationOffres = $this->entityManager->getRepository(CooptationOffreEmploi::class)->findAll();
-        return $this->json($cooptationOffres);
+        $cooptationsOffreEmploi = $cooptationOffreEmploiRepository->findAll();
+        return $this->json($cooptationsOffreEmploi);
     }
 
-    /**
-     * @Route("/cooptation-offre", name="cooptation_offre_emploi_create", methods={"POST"})
-     */
-    public function create(Request $request): JsonResponse
+    #[Route('/new', name: 'cooptation_offre_emploi_new', methods: ['POST'])]
+    public function new(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        $cooptationOffre = new CooptationOffreEmploi();
-        $cooptationOffre->setCooptation($this->entityManager->getRepository(Cooptation::class)->find($data['cooptation_id']));
+        $cooptationOffreEmploi = new CooptationOffreEmploi();
+        $cooptationOffreEmploi->setCooptation($this->entityManager->getRepository(Cooptation::class)->find($data['cooptation_id']));
+        $cooptationOffreEmploi->setOffreEmploi($this->entityManager->getRepository(OffreEmploi::class)->find($data['offre_emploi_id']));
 
-        $this->entityManager->persist($cooptationOffre);
+        $this->entityManager->persist($cooptationOffreEmploi);
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'Cooptation Offre Emploi created!'], JsonResponse::HTTP_CREATED);
+        return new JsonResponse(['status' => 'CooptationOffreEmploi created!'], JsonResponse::HTTP_CREATED);
     }
 
-    /**
-     * @Route("/cooptation-offre/{id}", name="cooptation_offre_emploi_show", methods={"GET"})
-     */
-    public function show(int $id): JsonResponse
+    #[Route('/{id}', name: 'cooptation_offre_emploi_show', methods: ['GET'])]
+    public function show(CooptationOffreEmploi $cooptationOffreEmploi): JsonResponse
     {
-        $cooptationOffre = $this->entityManager->getRepository(CooptationOffreEmploi::class)->find($id);
-
-        if (!$cooptationOffre) {
-            return new JsonResponse(['status' => 'Cooptation Offre Emploi not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        return $this->json($cooptationOffre);
+        return $this->json($cooptationOffreEmploi);
     }
 
-    /**
-     * @Route("/cooptation-offre/{id}", name="cooptation_offre_emploi_update", methods={"PUT"})
-     */
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/{id}/edit', name: 'cooptation_offre_emploi_edit', methods: ['PUT'])]
+    public function edit(Request $request, CooptationOffreEmploi $cooptationOffreEmploi): JsonResponse
     {
-        $cooptationOffre = $this->entityManager->getRepository(CooptationOffreEmploi::class)->find($id);
-
-        if (!$cooptationOffre) {
-            return new JsonResponse(['status' => 'Cooptation Offre Emploi not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         $data = json_decode($request->getContent(), true);
 
-        $cooptationOffre->setCooptation($this->entityManager->getRepository(Cooptation::class)->find($data['cooptation_id']));
-
+        $cooptationOffreEmploi->setCooptation($this->entityManager->getRepository(Cooptation::class)->find($data['cooptation_id']));
+        $cooptationOffreEmploi->setOffreEmploi($this->entityManager->getRepository(OffreEmploi::class)->find($data['offre_emploi_id']));
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'Cooptation Offre Emploi updated!'], JsonResponse::HTTP_OK);
+        return new JsonResponse(['status' => 'CooptationOffreEmploi updated!'], JsonResponse::HTTP_OK);
     }
 
-    /**
-     * @Route("/cooptation-offre/{id}", name="cooptation_offre_emploi_delete", methods={"DELETE"})
-     */
-    public function delete(int $id): JsonResponse
+    #[Route('/{id}', name: 'cooptation_offre_emploi_delete', methods: ['DELETE'])]
+    public function delete(CooptationOffreEmploi $cooptationOffreEmploi): JsonResponse
     {
-        $cooptationOffre = $this->entityManager->getRepository(CooptationOffreEmploi::class)->find($id);
-
-        if (!$cooptationOffre) {
-            return new JsonResponse(['status' => 'Cooptation Offre Emploi not found!'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        $this->entityManager->remove($cooptationOffre);
+        $this->entityManager->remove($cooptationOffreEmploi);
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'Cooptation Offre Emploi deleted!'], JsonResponse::HTTP_OK);
+        return new JsonResponse(['status' => 'CooptationOffreEmploi deleted!'], JsonResponse::HTTP_OK);
     }
 }
-
